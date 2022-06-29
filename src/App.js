@@ -1,23 +1,41 @@
-import logo from './logo.svg';
 import './App.css';
+import { useState, useEffect } from 'react'
+import CardContainer from './Components/CardContainer'
+import { Outlet } from 'react-router-dom'
+import NavBar from './Components/NavBar';
 
 function App() {
+  const [characters, setCharacter] = useState([])
+  const [name, setName] = useState('')
+
+  const deleteCharacter = (characterD) => {
+    const newCharacters = characters.filter(character => character !== characterD)
+    setCharacter(newCharacters)
+  }
+
+  useEffect(() => {
+    fetch('https://rickandmortyapi.com/api/character')
+      .then(response => response.json())
+      .then(({results}) => setCharacter(results))
+  }, [])
+
+  const filter = (event) => {
+    const {value} = event.target
+    setName(value)
+  }
+  
+  const filteredCharacters = () => {
+      return characters.filter(character => {
+        return character.name.toLowerCase()
+        .includes(name)
+      })
+  }
+  
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <NavBar name={name} filter={filter}/>
+      <Outlet />
+      <CardContainer key="characters" characters={filteredCharacters()} deleteCharacter={deleteCharacter}/>
     </div>
   );
 }
